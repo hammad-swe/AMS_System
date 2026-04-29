@@ -17,19 +17,20 @@ class SplashScreenViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         splashStarter()
+        
         // Do any additional setup after loading the view.
     }
     
     private func splashStarter(){
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0){ [weak self] in
-            self?.goToMainScreen()
+            self?.goToStartScreen()
         }
         
     }
 
-    private func goToMainScreen(){
-        let vc = LoginViewController()
-        self.navigationController?.setViewControllers([vc], animated: true)
+    private func goToStartScreen(){
+        let vc = StartScreenViewController(nibName: "StartScreenViewController", bundle: nil)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 
     
