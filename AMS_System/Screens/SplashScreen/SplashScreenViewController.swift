@@ -23,13 +23,13 @@ class SplashScreenViewController: UIViewController {
     
     private func splashStarter(){
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0){ [weak self] in
-            self?.goToStartScreen()
+            self?.goToLoginScreen()
         }
         
     }
 
-    private func goToStartScreen(){
-        let vc = StartScreenViewController(nibName: "StartScreenViewController", bundle: nil)
+    private func goToLoginScreen(){
+        let vc = LoginViewController(nibName: "LoginViewController", bundle: nil)
         self.navigationController?.pushViewController(vc, animated: true)
     }
 

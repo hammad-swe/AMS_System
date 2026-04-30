@@ -20,14 +20,14 @@ class StartScreenViewController: UIViewController {
 
 
     @IBAction func adminTapped(_ sender: Any) {
-        let vc = AdminLoginViewController(nibName: "AdminLoginViewController", bundle: nil)
-        self.navigationController?.pushViewController(vc, animated: true)
+//        let vc = AdminLoginViewController(nibName: "AdminLoginViewController", bundle: nil)
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     
     @IBAction func studentTapped(_ sender: Any) {
-        let vc = LoginViewController(nibName: "LoginViewController", bundle: nil)
-        self.navigationController?.pushViewController(vc, animated: true)
+//        let vc = LoginViewController(nibName: "LoginViewController", bundle: nil)
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
 }

@@ -6,8 +6,25 @@
 //
 
 import Foundation
-struct User: Codable {
-    let name : String
+import FirebaseFirestore
+
+enum UserRole: String, Codable {
+    case admin   = "admin"
+    case student = "student"
+}
+
+struct AppUser: Codable {
+    let uid: String
+    let name: String
     let email: String
-    let password: String
+    let role: UserRole
+    let createdAt: Date
+
+    // Firestore collection based on role
+    var collection: String {
+        switch role {
+        case .admin:   return "admin"
+        case .student: return "students"
+        }
+    }
 }
