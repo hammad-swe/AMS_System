@@ -16,7 +16,97 @@ final class AuthManager {
 
     var currentUser: FirebaseAuth.User? { Auth.auth().currentUser }
 
-    // MARK: - Google Sign-In + Role Assignment
+    // MARK: - Email Sign Up (new account)
+//    func signUpWithEmail(email: String,
+//                         password: String,
+//                         presenting viewController: UIViewController,
+//                         completion: @escaping (Result<(FirebaseAuth.User, UserRole), Error>) -> Void) {
+//
+//        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+//            if let error = error {
+//                completion(.failure(error))
+//                return
+//            }
+//
+//            guard let firebaseUser = authResult?.user else {
+//                completion(.failure(AuthError.noFirebaseUser))
+//                return
+//            }
+//
+//            // Assign role (admin if first, student otherwise)
+//            RoleManager.shared.assignRole(to: firebaseUser) { roleResult in
+//                switch roleResult {
+//                case .success(let role):
+//                    completion(.success((firebaseUser, role)))
+//                case .failure(let error):
+//                    completion(.failure(error))
+//                }
+//            }
+//        }
+//    }
+
+    func signUpWithEmail(email: String,
+                         password: String,
+                         presenting viewController: UIViewController,
+                         completion: @escaping (Result<(FirebaseAuth.User, UserRole), Error>) -> Void) {
+
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                print("❌ createUser failed: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let firebaseUser = authResult?.user else {
+                completion(.failure(AuthError.noFirebaseUser))
+                return
+            }
+
+            print("✅ Firebase user created: \(firebaseUser.email ?? "")")
+
+            // ← Must be assignRole (not fetchRole) for new users
+            RoleManager.shared.assignRole(to: firebaseUser) { roleResult in
+                switch roleResult {
+                case .success(let role):
+                    print("✅ Role assigned: \(role.rawValue)")
+                    completion(.success((firebaseUser, role)))
+                case .failure(let error):
+                    print("❌ Role assign failed: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+    // MARK: - Email Sign In (existing account)
+    func signInWithEmail(email: String,
+                         password: String,
+                         presenting viewController: UIViewController,
+                         completion: @escaping (Result<(FirebaseAuth.User, UserRole), Error>) -> Void) {
+
+        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let firebaseUser = authResult?.user else {
+                completion(.failure(AuthError.noFirebaseUser))
+                return
+            }
+
+            // Fetch existing role (user already in Firestore)
+            RoleManager.shared.fetchRole(for: firebaseUser.uid) { roleResult in
+                switch roleResult {
+                case .success(let role):
+                    completion(.success((firebaseUser, role)))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
+    // MARK: - Google Sign In / Sign Up (handles both)
     func signInWithGoogle(presenting viewController: UIViewController,
                           completion: @escaping (Result<(FirebaseAuth.User, UserRole), Error>) -> Void) {
 
@@ -56,7 +146,7 @@ final class AuthManager {
                     return
                 }
 
-                // Assign or fetch role
+                // assignRole handles both: new user (assigns) and returning user (fetches)
                 RoleManager.shared.assignRole(to: firebaseUser) { roleResult in
                     switch roleResult {
                     case .success(let role):
@@ -97,21 +187,19 @@ final class AuthManager {
         }
     }
 
-    // MARK: - Delete Admin Account
+    // MARK: - Delete Admin Account + All Students
     func deleteAdminAccount(completion: @escaping (Result<Void, Error>) -> Void) {
         guard let user = Auth.auth().currentUser else {
             completion(.failure(AuthError.noFirebaseUser))
             return
         }
 
-        // Step 1: Delete Firestore data (admin doc + all students)
         RoleManager.shared.deleteAdminAndAllStudents(adminUID: user.uid) { result in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
 
             case .success:
-                // Step 2: Delete Firebase Auth account
                 user.delete { error in
                     if let error = error {
                         completion(.failure(error))
@@ -125,14 +213,17 @@ final class AuthManager {
     }
 }
 
+// MARK: - Auth Errors
 enum AuthError: LocalizedError {
-    case missingClientID, missingToken, noFirebaseUser
+    case missingClientID
+    case missingToken
+    case noFirebaseUser
 
     var errorDescription: String? {
         switch self {
-        case .missingClientID:  return "Firebase client ID not found."
-        case .missingToken:     return "Google ID token is missing."
-        case .noFirebaseUser:   return "Firebase user not returned."
+        case .missingClientID: return "Firebase client ID not found."
+        case .missingToken:    return "Google ID token is missing."
+        case .noFirebaseUser:  return "Firebase user not returned."
         }
     }
 }

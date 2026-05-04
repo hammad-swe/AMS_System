@@ -43,18 +43,23 @@ class LoginViewController: UIViewController {
     
     @IBAction func loginTapped(_ sender: Any) {
         guard let email = nameField.text, !email.isEmpty,
-                    let password = passWordField.text, !password.isEmpty else {
-                  showAlert("Please enter email & password")
-                  return
-              }
-//        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-//                    if let error = error {
-//                        self.showAlert(error.localizedDescription)
-//                        return
-//                    }
-//
-//                    self.goToDashboard()
-//                }
+                     let password = passWordField.text, !password.isEmpty else {
+                   showError("Please enter email and password.")
+                   return
+               }
+
+               AuthManager.shared.signInWithEmail(email: email,
+                                                  password: password,
+                                                  presenting: self) { [weak self] result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let (user, role)):
+                           self?.navigate(user: user, role: role)
+                       case .failure(let error):
+                           self?.showError(error.localizedDescription)
+                       }
+                   }
+               }
         
         
         
@@ -67,12 +72,10 @@ class LoginViewController: UIViewController {
     
 
     @IBAction func googleTapped(_ sender: Any) {
-        setLoading(true)
-               // errorLabel.isHidden = true
+       // errorLabel.isHidden = true
 
                 AuthManager.shared.signInWithGoogle(presenting: self) { [weak self] result in
                     DispatchQueue.main.async {
-                        self?.setLoading(false)
                         switch result {
                         case .success(let (user, role)):
                             self?.navigate(user: user, role: role)
@@ -82,48 +85,48 @@ class LoginViewController: UIViewController {
                     }
                 }
     }
-    
-    
     // MARK: - Restore Previous Session
-    private func checkPreviousSignIn() {
-           setLoading(true)
+       private func checkPreviousSignIn() {
            AuthManager.shared.restorePreviousSignIn { [weak self] result in
                DispatchQueue.main.async {
-                   self?.setLoading(false)
                    if case .success(let (user, role)) = result {
                        self?.navigate(user: user, role: role)
                    }
                }
            }
        }
-    // MARK: - Role-based Navigation
-        private func navigate(user: FirebaseAuth.User, role: UserRole) {
-            let vc: UIViewController
-
-            switch role {
-            case .admin:
-                let adminVC = AdminDashboardViewController(nibName: "AdminDashboardViewController", bundle: nil)
-                adminVC.user = user
-                vc = adminVC
-
-            case .student:
-                let studentVC = StudentDashboardViewController(nibName: "StudentDashboardViewController", bundle: nil)
-                studentVC.user = user
-                vc = studentVC
-            }
-
-            navigationController?.setViewControllers([vc], animated: true)
-        }
-
+    
     
     @IBAction func signuptapped(_ sender: Any) {
         goToSignUp()
         
     }
+    private func navigate(user: FirebaseAuth.User, role: UserRole) {
+         let vc: UIViewController
+
+         switch role {
+         case .admin:
+             let adminVC = AdminDashboardViewController(nibName: "AdminDashboardViewController", bundle: nil)
+             adminVC.user = user
+             vc = adminVC
+
+         case .student:
+             let studentVC = StudentDashboardViewController(nibName: "StudentDashboardViewController", bundle: nil)
+             studentVC.user = user
+             vc = studentVC
+         }
+
+         navigationController?.setViewControllers([vc], animated: true)
+     }
     
     // navigate to signup
     func goToSignUp(){
         let vc = SignupViewController()
+        self.navigationController?.setViewControllers([vc], animated: true)
+    }
+    
+    func goToDashboard(){
+        let vc = AdminDashboardViewController()
         self.navigationController?.setViewControllers([vc], animated: true)
     }
     // alert
@@ -132,17 +135,11 @@ class LoginViewController: UIViewController {
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
         }
-    
-    // MARK: - Helpers
-        private func setLoading(_ loading: Bool) {
-            googleSignInButton.isEnabled = !loading
-            googleSignInButton.alpha = loading ? 0.6 : 1.0
-            //loading ? activityIndicator.startAnimating() : activityIndicator.stopAnimating()
-        }
-
+    // MARK: - Error
         private func showError(_ message: String) {
-//            errorLabel.text = message
-//            errorLabel.isHidden = false
+           // errorLabel.text = message
+           // errorLabel.isHidden = false
         }
+    
 
 }

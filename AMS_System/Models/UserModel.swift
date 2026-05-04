@@ -10,7 +10,7 @@ import FirebaseFirestore
 
 enum UserRole: String, Codable {
     case admin   = "admin"
-    case student = "student"
+    case student = "students"
 }
 
 struct AppUser: Codable {

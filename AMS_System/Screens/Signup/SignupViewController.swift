@@ -35,25 +35,51 @@ class SignupViewController: UIViewController {
     }
 
     @IBAction func signUpTapped(_ sender: Any) {
-        guard let name = nameLabel.text, !name.isEmpty,
-                let email = emailField.text, !email.isEmpty,
-                    let password = passWordField.text, !password.isEmpty else {
-                  showAlert("Please enter email & password")
-                  return
-              }
-        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-                  if let error = error {
-                      self.showAlert(error.localizedDescription)
-                      return
-                  }
+        guard let email =  emailField.text, !email.isEmpty,
+                     let password = passWordField.text, !password.isEmpty else {
+                   showError("Please enter email and password.")
+                   return
+               }
 
-                  self.showAlert("Account Created!")
-            
-            self.goToLogin()
-              }
-        
+               AuthManager.shared.signUpWithEmail(email: email,
+                                                  password: password,
+                                                  presenting: self) { [weak self] result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let (user, role)):
+                           self?.navigate(user: user, role: role)
+                       case .failure(let error):
+                           self?.showError(error.localizedDescription)
+                       }
+                   }
+               }
         
     }
+    
+    // MARK: - Add this navigate function
+        private func navigate(user: FirebaseAuth.User, role: UserRole) {
+            let vc: UIViewController
+
+            switch role {
+            case .admin:
+                let adminVC = AdminDashboardViewController(nibName: "AdminDashboardViewController", bundle: nil)
+                adminVC.user = user
+                vc = adminVC
+
+            case .student:
+                let studentVC = StudentDashboardViewController(nibName: "StudentDashboardViewController", bundle: nil)
+                studentVC.user = user
+                vc = studentVC
+            }
+
+            navigationController?.setViewControllers([vc], animated: true)
+        }
+
+        // MARK: - Add this error function if missing
+        private func showError(_ message: String) {
+            //errorLabel.text = message
+            //errorLabel.isHidden = false
+        }
     
     
     @IBAction func googleTapped(_ sender: Any) {
