@@ -16,35 +16,6 @@ final class AuthManager {
 
     var currentUser: FirebaseAuth.User? { Auth.auth().currentUser }
 
-    // MARK: - Email Sign Up (new account)
-//    func signUpWithEmail(email: String,
-//                         password: String,
-//                         presenting viewController: UIViewController,
-//                         completion: @escaping (Result<(FirebaseAuth.User, UserRole), Error>) -> Void) {
-//
-//        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-//            if let error = error {
-//                completion(.failure(error))
-//                return
-//            }
-//
-//            guard let firebaseUser = authResult?.user else {
-//                completion(.failure(AuthError.noFirebaseUser))
-//                return
-//            }
-//
-//            // Assign role (admin if first, student otherwise)
-//            RoleManager.shared.assignRole(to: firebaseUser) { roleResult in
-//                switch roleResult {
-//                case .success(let role):
-//                    completion(.success((firebaseUser, role)))
-//                case .failure(let error):
-//                    completion(.failure(error))
-//                }
-//            }
-//        }
-//    }
-
     func signUpWithEmail(email: String,
                          password: String,
                          presenting viewController: UIViewController,

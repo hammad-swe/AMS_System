@@ -30,30 +30,6 @@ final class RoleManager {
                }
     }
 
-    // MARK: - Save User with Role
-//    func saveUser(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void) {
-//        let data: [String: Any] = [
-//            "uid":       user.uid,
-//            "name":      user.name,
-//            "email":     user.email,
-//            "role":      user.role.rawValue,
-//            "createdAt": Timestamp(date: user.createdAt)
-//        ]
-//
-//        print("💾 Saving to collection: '\(user.collection)' | uid: \(user.uid) | role: \(user.role.rawValue)")
-//
-//        db.collection(user.collection)
-//            .document(user.uid)
-//            .setData(data) { error in
-//                if let error = error {
-//                    print("❌ Firestore save error: \(error.localizedDescription)")
-//                    completion(.failure(error))
-//                } else {
-//                    print("✅ Firestore save success → collection: '\(user.collection)'")
-//                    completion(.success(()))
-//                }
-//            }
-//    }
     
     func saveUser(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void) {
         let data: [String: Any] = [
