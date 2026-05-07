@@ -60,7 +60,7 @@ final class AttendanceManager {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    print("✅ Check-in recorded for \(studentName)")
+                    print("Check-in recorded for \(studentName)")
                     completion(.success(()))
                 }
             }
@@ -97,7 +97,7 @@ final class AttendanceManager {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    print("✅ Check-out recorded")
+                    print("Check-out recorded")
                     completion(.success(()))
                 }
             }

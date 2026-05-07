@@ -41,11 +41,11 @@ class AttendanceTableViewCell: UITableViewCell {
     private func updateButton() {
             switch currentStatus {
             case .present:
-                toggleButton.setTitle("✅ Present", for: .normal)
+                toggleButton.setTitle("Present", for: .normal)
                 toggleButton.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.15)
                 toggleButton.setTitleColor(.systemGreen, for: .normal)
             case .absent:
-                toggleButton.setTitle("❌ Absent", for: .normal)
+                toggleButton.setTitle("Absent", for: .normal)
                 toggleButton.backgroundColor = UIColor.systemRed.withAlphaComponent(0.15)
                 toggleButton.setTitleColor(.systemRed, for: .normal)
             }

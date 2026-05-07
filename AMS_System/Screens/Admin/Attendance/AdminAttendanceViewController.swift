@@ -90,7 +90,7 @@ class AdminAttendanceViewController: UIViewController {
 
             group.notify(queue: .main) { [weak self] in
                 self?.saveButton.isEnabled = true
-                let title   = failed ? "❌ Error"   : "✅ Saved"
+                let title   = failed ? "Error"   : "Saved"
                 let message = failed ? "Some records failed to save." : "Attendance saved for \(self?.selectedDate ?? "")."
                 self?.showAlert(title, message: message)
             }

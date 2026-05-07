@@ -45,7 +45,7 @@ final class StudentManager {
                        if let error = error {
                            completion(.failure(error))
                        } else {
-                           print("✅ Student added: \(name)")
+                           print("Student added: \(name)")
                            completion(.success(()))
                        }
                    }

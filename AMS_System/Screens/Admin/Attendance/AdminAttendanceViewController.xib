@@ -54,6 +54,9 @@
                     <rect key="frame" x="20" y="474.5" width="280" height="43.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="filled" title="Save Attendance"/>
+                    <connections>
+                        <action selector="saveTapped:" destination="-1" eventType="touchUpInside" id="QPh-uP-wqh"/>
+                    </connections>
                 </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>

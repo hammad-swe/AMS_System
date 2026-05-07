@@ -16,13 +16,27 @@ class AdminDashboardViewController: UIViewController {
     @IBOutlet weak var adminName: UILabel!
     @IBOutlet weak var StudentTableView: UITableView!
     @IBOutlet weak var Card1: UIStackView!
-    
+
     @IBOutlet weak var Card2: UIStackView!
     var user: FirebaseAuth.User?
     private var students: [Student] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        title = "Admin Dashboard"
+        // Add sign out button to right side of navbar
+            let signOutButton = UIBarButtonItem(
+                title: "Sign Out",
+                style: .plain,
+                target: self,
+                action: #selector(signOutTapped)
+            )
+            signOutButton.tintColor = .systemRed
+            navigationItem.rightBarButtonItem = signOutButton
+        
+        
+        
         adminName.text = "Welcome, \(user?.displayName ?? user?.email ?? "Admin")"
         Card1.layer.cornerRadius = 12
         Card1.clipsToBounds = true
@@ -37,6 +51,43 @@ class AdminDashboardViewController: UIViewController {
         StudentTableView.rowHeight = 70
         setupPieChart()
         // Do any additional setup after loading the view.
+    }
+    
+    // signout tapped
+    @objc private func signOutTapped() {
+        // Show confirmation alert first
+        let alert = UIAlertController(
+            title: "Sign Out",
+            message: "Are you sure you want to sign out?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Sign Out", style: .destructive) { [weak self] _ in
+            self?.performSignOut()
+        })
+
+        present(alert, animated: true)
+    }
+
+    private func performSignOut() {
+        AuthManager.shared.signOut { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    // Navigate back to login screen
+                    let loginVC = LoginViewController() // replace with your login VC
+                    let nav = UINavigationController(rootViewController: loginVC)
+                    nav.modalPresentationStyle = .fullScreen
+                    self?.view.window?.rootViewController = nav
+                    
+                case .failure(let error):
+                    let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self?.present(alert, animated: true)
+                }
+            }
+        }
     }
 
     // func for add, mark stack
@@ -53,6 +104,8 @@ class AdminDashboardViewController: UIViewController {
         let attendanceTap = UITapGestureRecognizer(target: self, action: #selector(didTapMarkAttendance))
         Card2.addGestureRecognizer(attendanceTap)
     }
+    
+    
     
     @objc private func didTapAddStudent() {
         // Navigate to Add Student Page
@@ -78,9 +131,10 @@ class AdminDashboardViewController: UIViewController {
             let data = PieChartData(dataSet: dataSet)
             pieChartView.data = data
         }
-    
-
+   
 }
+
+    
 
 extension AdminDashboardViewController: UITableViewDataSource, UITableViewDelegate {
 
@@ -97,10 +151,10 @@ extension AdminDashboardViewController: UITableViewDataSource, UITableViewDelega
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-       // let student = students[indexPath.row]
-        //let vc = StudentAttendanceViewController(nibName: "StudentAttendanceViewController", bundle: nil)
- // vc.studentUID  = student.uid
- // vc.studentName = student.name
-       // navigationController?.pushViewController(vc, animated: true)
+//        let student = students[indexPath.row]
+//        let vc = StudentAttendanceViewController(nibName: "StudentAttendanceViewController", bundle: nil)
+//  vc.studentUID  = student.uid
+//  vc.studentName = student.name
+//        navigationController?.pushViewController(vc, animated: true)
     }
 }

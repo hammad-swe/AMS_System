@@ -20,12 +20,12 @@ final class RoleManager {
                .limit(to: 1)
                .getDocuments { snapshot, error in
                    if let error = error {
-                       print("❌ adminExists BLOCKED: \(error.localizedDescription)")
+                       print("adminExists BLOCKED: \(error.localizedDescription)")
                        completion(false)
                        return
                    }
                    let count = snapshot?.documents.count ?? 0
-                   print("👤 Admin docs found: \(count)")
+                   print("Admin docs found: \(count)")
                    completion(count > 0)
                }
     }
@@ -46,10 +46,10 @@ final class RoleManager {
             .document(user.uid)
             .setData(data) { error in
                 if let error = error {
-                    print("❌ SAVE FAILED: \(error.localizedDescription)")
+                    print("SAVE FAILED: \(error.localizedDescription)")
                     completion(.failure(error))
                 } else {
-                    print("✅ SAVE SUCCESS → '\(user.collection)'")
+                    print("SAVE SUCCESS → '\(user.collection)'")
                     completion(.success(()))
                 }
             }
@@ -64,7 +64,7 @@ final class RoleManager {
         db.collection("admin").document(uid).getDocument { snapshot, error in
 
             if let error = error {
-                print("❌ Error checking admin collection: \(error.localizedDescription)")
+                print("Error checking admin collection: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
@@ -72,17 +72,17 @@ final class RoleManager {
             if let data = snapshot?.data(),
                let roleStr = data["role"] as? String,
                let role = UserRole(rawValue: roleStr) {
-                print("✅ Found in admin collection → role: \(role.rawValue)")
+                print("Found in admin collection → role: \(role.rawValue)")
                 completion(.success(role))
                 return
             }
 
-            print("ℹ️ Not found in admin, checking students collection...")
+            print("Not found in admin, checking students collection...")
 
             // Check students collection
             self.db.collection("students").document(uid).getDocument { snapshot, error in
                 if let error = error {
-                    print("❌ Error checking students collection: \(error.localizedDescription)")
+                    print("Error checking students collection: \(error.localizedDescription)")
                     completion(.failure(error))
                     return
                 }
@@ -90,12 +90,12 @@ final class RoleManager {
                 guard let data = snapshot?.data(),
                       let roleStr = data["role"] as? String,
                       let role = UserRole(rawValue: roleStr) else {
-                    print("⚠️ Not found in students either → new user")
+                    print("Not found in students either → new user")
                     completion(.failure(RoleError.roleNotFound))
                     return
                 }
 
-                print("✅ Found in students collection → role: \(role.rawValue)")
+                print("Found in students collection → role: \(role.rawValue)")
                 completion(.success(role))
             }
         }
@@ -113,16 +113,16 @@ final class RoleManager {
             switch result {
             case .success(let role):
                 // Returning user — role already assigned
-                print("↩️ Returning user → role: \(role.rawValue)")
+                print("Returning user → role: \(role.rawValue)")
                 completion(.success(role))
 
             case .failure:
                 // New user — check if admin slot is taken
-                print("🆕 New user detected, checking adminExists...")
+                print("New user detected, checking adminExists...")
 
                 self.adminExists { adminExists in
                     let role: UserRole = adminExists ? .student : .admin
-                    print("📝 Assigning role: '\(role.rawValue)' to \(email)")
+                    print("Assigning role: '\(role.rawValue)' to \(email)")
 
                     let appUser = AppUser(
                         uid:       firebaseUser.uid,
@@ -135,10 +135,10 @@ final class RoleManager {
                     self.saveUser(appUser) { saveResult in
                         switch saveResult {
                         case .success:
-                            print("✅ Role '\(role.rawValue)' assigned and saved successfully")
+                            print("Role '\(role.rawValue)' assigned and saved successfully")
                             completion(.success(role))
                         case .failure(let error):
-                            print("❌ Failed to save role: \(error.localizedDescription)")
+                            print("Failed to save role: \(error.localizedDescription)")
                             completion(.failure(error))
                         }
                     }
@@ -156,7 +156,7 @@ final class RoleManager {
         // Step 1: Fetch all students
         db.collection("students").getDocuments { snapshot, error in
             if let error = error {
-                print("❌ Failed to fetch students: \(error.localizedDescription)")
+                print("Failed to fetch students: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
@@ -177,10 +177,10 @@ final class RoleManager {
             // Step 4: Commit batch
             batch.commit { error in
                 if let error = error {
-                    print("❌ Batch delete failed: \(error.localizedDescription)")
+                    print("Batch delete failed: \(error.localizedDescription)")
                     completion(.failure(error))
                 } else {
-                    print("✅ Admin and \(studentCount) student(s) deleted successfully")
+                    print("Admin and \(studentCount) student(s) deleted successfully")
                     completion(.success(()))
                 }
             }
@@ -193,13 +193,13 @@ final class RoleManager {
 
         db.collection("students").getDocuments { snapshot, error in
             if let error = error {
-                print("❌ Failed to fetch students: \(error.localizedDescription)")
+                print("Failed to fetch students: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
             let students = snapshot?.documents.map { $0.data() } ?? []
-            print("✅ Fetched \(students.count) student(s)")
+            print("Fetched \(students.count) student(s)")
             completion(.success(students))
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class AddStudentViewController: UIViewController {
 
@@ -15,6 +16,8 @@ class AddStudentViewController: UIViewController {
     @IBOutlet weak var  saveButton: UIButton!
     
     @IBOutlet weak var errorLabel: UILabel!
+    
+    
     var adminUID: String?
         var onStudentAdded: (() -> Void)?
     
@@ -26,6 +29,16 @@ class AddStudentViewController: UIViewController {
     }
 
     @IBAction func saveTapped(_ sender: UIButton) {
+//        print("🔘 saveTapped fired")
+//            print("   nameField.text = '\(nameField.text ?? "NIL")'")
+//            print("   emailField.text = '\(emailField.text ?? "NIL")'")
+//            print("   passwordField.text = '\(passwordField.text ?? "NIL")'")
+//            print("   adminUID = '\(adminUID ?? "NIL")'")
+
+        
+        
+        
+        
             guard let name     =  nameField.text,     !name.isEmpty,
                   let email    = emailField.text,    !email.isEmpty,
                   let password =  passwordField.text, !password.isEmpty else {
@@ -33,7 +46,18 @@ class AddStudentViewController: UIViewController {
                 return
             }
 
-            guard let adminUID = adminUID else { return }
+//            guard let adminUID = adminUID else {
+//                print("🔴 adminUID is nil")
+//                return }
+        
+        // Get adminUID directly from current signed-in user
+            guard let adminUID = Auth.auth().currentUser?.uid else {
+                showError("Session expired. Please sign in again.")
+                return
+            }
+
+            print("✅ adminUID: \(adminUID)")
+
 
         saveButton.isEnabled = false
 

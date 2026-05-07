@@ -23,7 +23,7 @@ final class AuthManager {
 
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
-                print("❌ createUser failed: \(error.localizedDescription)")
+                print("createUser failed: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
@@ -33,16 +33,16 @@ final class AuthManager {
                 return
             }
 
-            print("✅ Firebase user created: \(firebaseUser.email ?? "")")
+            print("Firebase user created: \(firebaseUser.email ?? "")")
 
             // ← Must be assignRole (not fetchRole) for new users
             RoleManager.shared.assignRole(to: firebaseUser) { roleResult in
                 switch roleResult {
                 case .success(let role):
-                    print("✅ Role assigned: \(role.rawValue)")
+                    print("Role assigned: \(role.rawValue)")
                     completion(.success((firebaseUser, role)))
                 case .failure(let error):
-                    print("❌ Role assign failed: \(error.localizedDescription)")
+                    print("Role assign failed: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
             }
