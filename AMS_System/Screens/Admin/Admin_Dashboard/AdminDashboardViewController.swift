@@ -20,6 +20,7 @@ class AdminDashboardViewController: UIViewController {
     @IBOutlet weak var Card2: UIStackView!
     var user: FirebaseAuth.User?
     private var students: [Student] = []
+    private var attendanceMap: [String: AttendanceStatus] = [:]  
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -145,16 +146,22 @@ extension AdminDashboardViewController: UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "StudentTableViewCell",
                                                   for: indexPath) as! StudentTableViewCell
-       // cell.configure(student: students[indexPath.row])
-        return cell
+        let student = students[indexPath.row]
+                let status  = attendanceMap[student.uid] ?? .absent  // ✅ actual value
+
+                cell.configure(student: student, status: status)
+                cell.onToggle = { [weak self] newStatus in
+                    self?.attendanceMap[student.uid] = newStatus
+                }
+                return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-//        let student = students[indexPath.row]
-//        let vc = StudentAttendanceViewController(nibName: "StudentAttendanceViewController", bundle: nil)
-//  vc.studentUID  = student.uid
-//  vc.studentName = student.name
-//        navigationController?.pushViewController(vc, animated: true)
+        let student = students[indexPath.row]
+        let vc = StudentAttendanceViewController(nibName: "StudentAttendanceViewController", bundle: nil)
+  vc.studentUID  = student.uid
+  vc.studentName = student.name
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

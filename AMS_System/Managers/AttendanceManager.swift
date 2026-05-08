@@ -28,10 +28,41 @@ final class AttendanceManager {
         return f.string(from: date)
     }
 
+    // MARK: - Time Validation
+    private var currentHour: Int {
+        return Calendar.current.component(.hour, from: Date())
+    }
+
+    private func isWithinAllowedTime() -> Bool {
+        // Allowed between 8AM and 7PM
+        return currentHour >= 8 && currentHour < 19
+    }
+
+    private func isWithinCheckOutTime(checkInTime: Date) -> Bool {
+        // Cannot check out after 7PM
+        guard currentHour < 19 else { return false }
+
+        // Cannot check out if checked in after school ends (6PM)
+        let checkInHour = Calendar.current.component(.hour, from: checkInTime)
+        guard checkInHour < 18 else { return false }
+
+        return true
+    }
+
     // MARK: - Student Check In
     func checkIn(studentUID: String,
                  studentName: String,
                  completion: @escaping (Result<Void, Error>) -> Void) {
+
+        // Time restriction check
+        guard isWithinAllowedTime() else {
+            if currentHour < 8 {
+                completion(.failure(AttendanceError.tooEarly))
+            } else {
+                completion(.failure(AttendanceError.tooLate))
+            }
+            return
+        }
 
         let today = todayString
         let ref   = db.collection("attendance")
@@ -39,7 +70,6 @@ final class AttendanceManager {
                       .collection("records")
                       .document(today)
 
-        // Check if already checked in today
         ref.getDocument { snapshot, error in
             if let data = snapshot?.data(),
                data["checkIn"] != nil {
@@ -71,6 +101,12 @@ final class AttendanceManager {
     func checkOut(studentUID: String,
                   completion: @escaping (Result<Void, Error>) -> Void) {
 
+        // Time restriction check
+        guard isWithinAllowedTime() else {
+            completion(.failure(AttendanceError.tooLate))
+            return
+        }
+
         let today = todayString
         let ref   = db.collection("attendance")
                       .document(studentUID)
@@ -83,13 +119,22 @@ final class AttendanceManager {
                 return
             }
 
-            if data["checkIn"] == nil {
+            // Must have checked in first
+            guard let checkInTimestamp = data["checkIn"] as? Timestamp else {
                 completion(.failure(AttendanceError.notCheckedIn))
                 return
             }
 
+            // Already checked out
             if data["checkOut"] != nil {
                 completion(.failure(AttendanceError.alreadyCheckedOut))
+                return
+            }
+
+            // Check if checkout window is still open
+            let checkInTime = checkInTimestamp.dateValue()
+            guard self.isWithinCheckOutTime(checkInTime: checkInTime) else {
+                completion(.failure(AttendanceError.checkOutExpired))
                 return
             }
 
@@ -232,12 +277,24 @@ enum AttendanceError: LocalizedError {
     case alreadyCheckedIn
     case alreadyCheckedOut
     case notCheckedIn
+    case tooEarly
+    case tooLate
+    case checkOutExpired
 
     var errorDescription: String? {
         switch self {
-        case .alreadyCheckedIn:  return "You have already checked in today."
-        case .alreadyCheckedOut: return "You have already checked out today."
-        case .notCheckedIn:      return "You haven't checked in yet today."
+        case .alreadyCheckedIn:
+            return "You have already checked in today."
+        case .alreadyCheckedOut:
+            return "You have already checked out today."
+        case .notCheckedIn:
+            return "You haven't checked in yet today."
+        case .tooEarly:
+            return "Check-in opens at 8:00 AM."
+        case .tooLate:
+            return "Check-in/out is closed after 7:00 PM."
+        case .checkOutExpired:
+            return "Check-out window has closed. Please contact your admin."
         }
     }
 }

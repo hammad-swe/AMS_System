@@ -15,8 +15,6 @@ class AdminAttendanceViewController: UIViewController {
         @IBOutlet weak var saveButton: UIButton!
         @IBOutlet weak var dateLabel: UILabel!
     
-    @IBOutlet weak var searchStudentField: UITextField!
-    
         var students: [Student] = []
         private var attendanceMap: [String: AttendanceStatus] = [:]
         private var selectedDate: String = ""
