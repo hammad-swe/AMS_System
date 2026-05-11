@@ -19,8 +19,8 @@ class AdminDashboardViewController: UIViewController {
 
     @IBOutlet weak var Card2: UIStackView!
     var user: FirebaseAuth.User?
-    private var students: [Student] = []
-    private var attendanceMap: [String: AttendanceStatus] = [:]  
+   private var students: [Student] = []
+        private var attendanceMap: [String: AttendanceStatus] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,8 +50,43 @@ class AdminDashboardViewController: UIViewController {
         StudentTableView.register(UINib(nibName: "StudentTableViewCell", bundle: nil),
                                            forCellReuseIdentifier: "StudentTableViewCell")
         StudentTableView.rowHeight = 70
+//        loadStudents()
         setupPieChart()
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadStudents()
+        
+    }
+    
+    // MARK: - Load Students
+        private func loadStudents() {
+            StudentManager.shared.fetchAllStudents { [weak self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let students):
+                        self?.students = students  // ✅ stored here
+                        self?.loadAttendanceMap(for: students) 
+//                        self?.StudentTableView.reloadData()
+                        print("✅ Students loaded: \(students.count)")
+
+                    case .failure(let error):
+                        print("❌ Failed to load students: \(error.localizedDescription)")
+                        self?.showAlert("Error", message: error.localizedDescription)
+                    }
+                }
+            }
+        }
+    
+    private func loadAttendanceMap(for students: [Student]) {
+        let today = AttendanceManager.shared.todayString  // ✅ reuse existing helper
+
+        AttendanceManager.shared.fetchAttendanceForDate(today, students: students) { [weak self] recordMap in
+            self?.attendanceMap = recordMap.mapValues { $0.status }  // ⚠️ adjust .status to your field name
+            self?.StudentTableView.reloadData()
+        }
     }
     
     // signout tapped
@@ -115,9 +150,18 @@ class AdminDashboardViewController: UIViewController {
     }
 
     @objc private func didTapMarkAttendance() {
-        // Navigate to Attendance Page
-        let vc = AdminAttendanceViewController(nibName: "AdminAttendanceViewController", bundle: nil)
-        self.navigationController?.pushViewController(vc, animated: true)
+        
+        guard !students.isEmpty else {
+               showAlert("Error", message: "No students found. Please wait.")
+               return
+           }
+
+           let vc = AdminAttendanceViewController(nibName: "AdminAttendanceViewController", bundle: nil)
+           vc.students = students  // ✅ must be set before push
+           navigationController?.pushViewController(vc, animated: true)
+//        // Navigate to Attendance Page
+//        let vc = AdminAttendanceViewController(nibName: "AdminAttendanceViewController", bundle: nil)
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
      // func for pie chart
@@ -132,36 +176,42 @@ class AdminDashboardViewController: UIViewController {
             let data = PieChartData(dataSet: dataSet)
             pieChartView.data = data
         }
+    
+    private func showAlert(_ title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
    
 }
 
-    
-
+  
 extension AdminDashboardViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       return students.count
+        return students.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "StudentTableViewCell",
-                                                  for: indexPath) as! StudentTableViewCell
+        let cell    = tableView.dequeueReusableCell(withIdentifier: "StudentTableViewCell",
+                                                    for: indexPath) as! StudentTableViewCell
         let student = students[indexPath.row]
-                let status  = attendanceMap[student.uid] ?? .absent  // ✅ actual value
+        let status  = attendanceMap[student.uid] ?? .absent  // ✅ actual value
 
-                cell.configure(student: student, status: status)
-                cell.onToggle = { [weak self] newStatus in
-                    self?.attendanceMap[student.uid] = newStatus
-                }
-                return cell
+        cell.configure(student: student, status: status)
+        cell.onToggle = { [weak self] newStatus in
+            self?.attendanceMap[student.uid] = newStatus
+        }
+        return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let student = students[indexPath.row]
         let vc = StudentAttendanceViewController(nibName: "StudentAttendanceViewController", bundle: nil)
-  vc.studentUID  = student.uid
-  vc.studentName = student.name
+        vc.studentUID  = student.uid
+        vc.studentName = student.name
         navigationController?.pushViewController(vc, animated: true)
     }
 }
+

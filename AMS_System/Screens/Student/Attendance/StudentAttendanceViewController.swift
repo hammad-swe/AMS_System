@@ -29,6 +29,7 @@ class StudentAttendanceViewController: UIViewController {
                 attendanceTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
                 attendanceTableView.rowHeight = 60
         // Do any additional setup after loading the view.
+        loadHistory()
     }
 
 

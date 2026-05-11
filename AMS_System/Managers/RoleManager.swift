@@ -11,6 +11,8 @@ import FirebaseAuth
 final class RoleManager {
 
     static let shared = RoleManager()
+    
+//    database connection
     private let db = Firestore.firestore()
     private init() {}
 

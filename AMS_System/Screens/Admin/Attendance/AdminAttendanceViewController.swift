@@ -22,14 +22,18 @@ class AdminAttendanceViewController: UIViewController {
         override func viewDidLoad() {
             super.viewDidLoad()
             title = "Mark Attendance"
-           // setupUI()
+           setupUI()
+            
+            // ✅ Reset to absent before loading new date
+                    students.forEach { attendanceMap[$0.uid] = .absent }
+            
            loadAttendanceForSelectedDate()
-            attendanceTableView.dataSource = self
-            attendanceTableView.delegate   = self
-            attendanceTableView.register(UINib(nibName: "AttendanceTableViewCell", bundle: nil),
-                                         forCellReuseIdentifier: "AttendanceTableViewCell")
-            attendanceTableView.rowHeight = 60
-            students.forEach { attendanceMap[$0.uid] = .absent }
+//            attendanceTableView.dataSource = self
+//            attendanceTableView.delegate   = self
+//            attendanceTableView.register(UINib(nibName: "AttendanceTableViewCell", bundle: nil),
+//                                         forCellReuseIdentifier: "AttendanceTableViewCell")
+//            attendanceTableView.rowHeight = 60
+//            students.forEach { attendanceMap[$0.uid] = .absent }
         }
 
         private func setupUI() {
@@ -53,45 +57,83 @@ class AdminAttendanceViewController: UIViewController {
         @objc private func dateChanged() {
             selectedDate   = AttendanceManager.shared.dateString(from: datePicker.date)
             dateLabel.text = "Date: \(selectedDate)"
+            // ✅ Reset to absent before loading new date
+                    students.forEach { attendanceMap[$0.uid] = .absent }
             loadAttendanceForSelectedDate()
         }
 
-        private func loadAttendanceForSelectedDate() {
+    private func loadAttendanceForSelectedDate() {
+            // ✅ Reload immediately to show defaults
+            attendanceTableView.reloadData()
+
+            guard !students.isEmpty else { return }
+
             AttendanceManager.shared.fetchAttendanceForDate(selectedDate,
                                                             students: students) { [weak self] map in
                 guard let self = self else { return }
-                // Merge fetched data — keep absent as default for unrecorded
                 self.students.forEach { student in
                     self.attendanceMap[student.uid] = map[student.uid]?.status ?? .absent
                 }
-                self.attendanceTableView.reloadData()
+                DispatchQueue.main.async {
+                    self.attendanceTableView.reloadData()
+                }
             }
         }
 
         // MARK: - Save All Attendance
         @IBAction func saveTapped(_ sender: UIButton) {
-            saveButton.isEnabled = false
-            let group = DispatchGroup()
-            var failed = false
+            
+            guard !students.isEmpty else {
+                       showAlert("Error", message: "No students found.")
+                       return
+                   }
 
-            for student in students {
-                let status = attendanceMap[student.uid] ?? .absent
-                group.enter()
-                AttendanceManager.shared.markAttendance(studentUID:  student.uid,
-                                                        studentName: student.name,
-                                                        status:      status,
-                                                        date:        selectedDate) { result in
-                    if case .failure = result { failed = true }
-                    group.leave()
-                }
-            }
+                   saveButton.isEnabled = false
+                   let group = DispatchGroup()
+                   var failed = false
 
-            group.notify(queue: .main) { [weak self] in
-                self?.saveButton.isEnabled = true
-                let title   = failed ? "Error"   : "Saved"
-                let message = failed ? "Some records failed to save." : "Attendance saved for \(self?.selectedDate ?? "")."
-                self?.showAlert(title, message: message)
-            }
+                   for student in students {
+                       let status = attendanceMap[student.uid] ?? .absent
+                       group.enter()
+                       AttendanceManager.shared.markAttendance(studentUID:  student.uid,
+                                                               studentName: student.name,
+                                                               status:      status,
+                                                               date:        selectedDate) { result in
+                           if case .failure = result { failed = true }
+                           group.leave()
+                       }
+                   }
+
+                   group.notify(queue: .main) { [weak self] in
+                       self?.saveButton.isEnabled = true
+                       let title   = failed ? "❌ Error" : "✅ Saved"
+                       let message = failed ? "Some records failed to save."
+                                            : "Attendance saved for \(self?.selectedDate ?? "")."
+                       self?.showAlert(title, message: message)
+                   }
+            
+//            saveButton.isEnabled = false
+//            let group = DispatchGroup()
+//            var failed = false
+//
+//            for student in students {
+//                let status = attendanceMap[student.uid] ?? .absent
+//                group.enter()
+//                AttendanceManager.shared.markAttendance(studentUID:  student.uid,
+//                                                        studentName: student.name,
+//                                                        status:      status,
+//                                                        date:        selectedDate) { result in
+//                    if case .failure = result { failed = true }
+//                    group.leave()
+//                }
+//            }
+//
+//            group.notify(queue: .main) { [weak self] in
+//                self?.saveButton.isEnabled = true
+//                let title   = failed ? "Error"   : "Saved"
+//                let message = failed ? "Some records failed to save." : "Attendance saved for \(self?.selectedDate ?? "")."
+//                self?.showAlert(title, message: message)
+//            }
         }
 
         private func showAlert(_ title: String, message: String) {
@@ -102,23 +144,48 @@ class AdminAttendanceViewController: UIViewController {
     }
 
     // MARK: - TableView
+
 extension AdminAttendanceViewController: UITableViewDataSource, UITableViewDelegate {
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return students.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell    = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell",
                                                     for: indexPath) as! AttendanceTableViewCell
         let student = students[indexPath.row]
         let status  = attendanceMap[student.uid] ?? .absent
-        
+
         cell.configure(name: student.name, email: student.email, status: status)
         cell.onToggle = { [weak self] newStatus in
             self?.attendanceMap[student.uid] = newStatus
         }
         return cell
     }
-    
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
+    }
 }
+
+//extension AdminAttendanceViewController: UITableViewDataSource, UITableViewDelegate {
+//    
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        return students.count
+//    }
+//    
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell    = tableView.dequeueReusableCell(withIdentifier: "AttendanceTableViewCell",
+//                                                    for: indexPath) as! AttendanceTableViewCell
+//        let student = students[indexPath.row]
+//        let status  = attendanceMap[student.uid] ?? .absent
+//        
+//        cell.configure(name: student.name, email: student.email, status: status)
+//        cell.onToggle = { [weak self] newStatus in
+//            self?.attendanceMap[student.uid] = newStatus
+//        }
+//        return cell
+//    }
+//    
+//}

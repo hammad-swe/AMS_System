@@ -9,8 +9,7 @@ import UIKit
 
 class StudentTableViewCell: UITableViewCell {
 
-    
-    @IBOutlet weak var avatarImageView: UIImageView!
+    static let identifier = "StudentTableViewCell" 
     @IBOutlet weak var studentName: UILabel!
     @IBOutlet weak var statusButton: UIButton!
     
@@ -34,16 +33,6 @@ class StudentTableViewCell: UITableViewCell {
           studentName.text = student.name
           currentStatus  = status
 
-          // Avatar initials
-//          let initials = student.name
-//              .split(separator: " ")
-//              .prefix(2)
-//              .compactMap { $0.first }
-//              .map { String($0).uppercased() }
-//              .joined()
-
-//          avatarLabel.text          = initials.isEmpty ? "?" : initials
-          //avatarImageView.backgroundColor = colorForName(student.name)
 
           updateButtonUI()
       }

@@ -17,29 +17,22 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dwz-Fy-bnq">
-                        <rect key="frame" x="0.0" y="0.0" width="329" height="90"/>
+                        <rect key="frame" x="0.0" y="0.0" width="329" height="93"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="sKL-Bq-0OB">
-                                <rect key="frame" x="10" y="10" width="50" height="70"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="50" id="946-hD-hYP"/>
-                                    <constraint firstAttribute="height" constant="50" id="B0T-qo-1o1"/>
-                                </constraints>
-                            </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="MGW-yU-PfO">
-                                <rect key="frame" x="60" y="10" width="259" height="70"/>
+                                <rect key="frame" x="10" y="10" width="309" height="73"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EFg-nm-ofI">
-                                        <rect key="frame" x="10.000000000000007" y="0.0" width="119.66666666666669" height="70"/>
+                                        <rect key="frame" x="10" y="0.0" width="144.66666666666666" height="73"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Car-De-mfx">
-                                        <rect key="frame" x="129.66666666666666" y="0.0" width="119.33333333333334" height="70"/>
+                                        <rect key="frame" x="154.66666666666663" y="0.0" width="144.33333333333337" height="73"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="filled" title="Button">
-                                            <fontDescription key="titleFontDescription" type="system" pointSize="10"/>
+                                            <fontDescription key="titleFontDescription" type="system" pointSize="20"/>
                                         </buttonConfiguration>
                                     </button>
                                 </subviews>
@@ -58,7 +51,6 @@
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
-                <outlet property="imageView" destination="sKL-Bq-0OB" id="S9W-cE-Uoa"/>
                 <outlet property="statusButton" destination="Car-De-mfx" id="sh0-tw-evB"/>
                 <outlet property="studentName" destination="EFg-nm-ofI" id="hp2-XG-ILg"/>
             </connections>
