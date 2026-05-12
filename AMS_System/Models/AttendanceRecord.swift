@@ -41,3 +41,17 @@ struct AttendanceRecord {
         return Int(o.timeIntervalSince(i) / 60)
     }
 }
+
+extension AttendanceRecord {
+    static func mock(status: AttendanceStatus) -> AttendanceRecord {
+        return AttendanceRecord(
+            studentUID:  "",
+            studentName: "",
+            date:        "",
+            status:      status,
+            checkIn:     nil,
+            checkOut:    nil,
+            markedAt:    Date()
+        )
+    }
+}
