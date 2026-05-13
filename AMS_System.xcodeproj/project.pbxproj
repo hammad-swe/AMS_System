@@ -33,7 +33,6 @@
 		100F96872FA219B6004CBD00 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 100F96862FA219B6004CBD00 /* FirebaseRemoteConfig */; };
 		100F96892FA219B6004CBD00 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 100F96882FA219B6004CBD00 /* FirebaseStorage */; };
 		100F968B2FA219B6004CBD00 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 100F968A2FA219B6004CBD00 /* FirebaseStorageCombine-Community */; };
-		1085D14C2FAA010600A08B6B /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 1085D14B2FAA010600A08B6B /* DGCharts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,7 +81,6 @@
 				100F967D2FA219B6004CBD00 /* FirebaseInAppMessaging-Beta in Frameworks */,
 				100F967B2FA219B6004CBD00 /* FirebaseFunctionsCombine-Community in Frameworks */,
 				100F96612FA219B6004CBD00 /* FirebaseAnalytics in Frameworks */,
-				1085D14C2FAA010600A08B6B /* DGCharts in Frameworks */,
 				100F968B2FA219B6004CBD00 /* FirebaseStorageCombine-Community in Frameworks */,
 				100F96872FA219B6004CBD00 /* FirebaseRemoteConfig in Frameworks */,
 				100F96712FA219B6004CBD00 /* FirebaseCrashlytics in Frameworks */,
@@ -161,7 +159,6 @@
 				100F96862FA219B6004CBD00 /* FirebaseRemoteConfig */,
 				100F96882FA219B6004CBD00 /* FirebaseStorage */,
 				100F968A2FA219B6004CBD00 /* FirebaseStorageCombine-Community */,
-				1085D14B2FAA010600A08B6B /* DGCharts */,
 			);
 			productName = AMS_System;
 			productReference = 1054DE822F9F266500299144 /* AMS_System.app */;
@@ -175,7 +172,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2640;
-				LastUpgradeCheck = 2640;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					1054DE812F9F266500299144 = {
 						CreatedOnToolsVersion = 26.4.1;
@@ -194,7 +191,6 @@
 			packageReferences = (
 				100F96562FA216C7004CBD00 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				100F965B2FA219B6004CBD00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				1085D14A2FAA010600A08B6B /* XCRemoteSwiftPackageReference "Charts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1054DE832F9F266500299144 /* Products */;
@@ -349,7 +345,9 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				"OTHER_SWIFT_FLAGS[arch=*]" = "-suppress-warnings";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -406,7 +404,9 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				"OTHER_SWIFT_FLAGS[arch=*]" = "-suppress-warnings";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -450,14 +450,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 12.12.1;
-			};
-		};
-		1085D14A2FAA010600A08B6B /* XCRemoteSwiftPackageReference "Charts" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/danielgindi/Charts";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.1.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -592,11 +584,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 100F965B2FA219B6004CBD00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = "FirebaseStorageCombine-Community";
-		};
-		1085D14B2FAA010600A08B6B /* DGCharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1085D14A2FAA010600A08B6B /* XCRemoteSwiftPackageReference "Charts" */;
-			productName = DGCharts;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

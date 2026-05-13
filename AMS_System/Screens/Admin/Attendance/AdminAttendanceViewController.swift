@@ -14,6 +14,8 @@ class AdminAttendanceViewController: UIViewController {
         @IBOutlet weak var attendanceTableView: UITableView!
         @IBOutlet weak var saveButton: UIButton!
         @IBOutlet weak var dateLabel: UILabel!
+    // MARK: - Delegate
+    weak var delegate: AttendanceDelegate?
     
         var students: [Student] = []
         private var attendanceMap: [String: AttendanceStatus] = [:]
@@ -23,10 +25,8 @@ class AdminAttendanceViewController: UIViewController {
             super.viewDidLoad()
             title = "Mark Attendance"
            setupUI()
-            
             // ✅ Reset to absent before loading new date
-                    students.forEach { attendanceMap[$0.uid] = .absent }
-            
+            students.forEach { attendanceMap[$0.uid] = .absent }
            loadAttendanceForSelectedDate()
 //            attendanceTableView.dataSource = self
 //            attendanceTableView.delegate   = self
@@ -82,34 +82,72 @@ class AdminAttendanceViewController: UIViewController {
 
         // MARK: - Save All Attendance
         @IBAction func saveTapped(_ sender: UIButton) {
-            
             guard !students.isEmpty else {
-                       showAlert("Error", message: "No students found.")
-                       return
+                   showAlert("Error", message: "No students found.")
+                   return
+               }
+
+               saveButton.isEnabled = false
+               let group = DispatchGroup()
+               var failed = false
+
+               for student in students {
+                   let status = attendanceMap[student.uid] ?? .absent
+                   group.enter()
+                   AttendanceManager.shared.markAttendance(studentUID:  student.uid,
+                                                           studentName: student.name,
+                                                           status:      status,
+                                                           date:        selectedDate) { result in
+                       if case .failure = result { failed = true }
+                       group.leave()
                    }
+               }
 
-                   saveButton.isEnabled = false
-                   let group = DispatchGroup()
-                   var failed = false
+               group.notify(queue: .main) { [weak self] in
+                   guard let self = self else { return }
+                   self.saveButton.isEnabled = true
 
-                   for student in students {
-                       let status = attendanceMap[student.uid] ?? .absent
-                       group.enter()
-                       AttendanceManager.shared.markAttendance(studentUID:  student.uid,
-                                                               studentName: student.name,
-                                                               status:      status,
-                                                               date:        selectedDate) { result in
-                           if case .failure = result { failed = true }
-                           group.leave()
+                   if failed {
+                       self.showAlert("❌ Error", message: "Some records failed to save.")
+                   } else {
+
+                       // ✅ FIRE DELEGATE HERE
+                       self.delegate?.didSaveAttendance(self.attendanceMap, date: self.selectedDate)
+
+                       self.showAlert("✅ Saved",
+                                      message: "Attendance saved for \(self.selectedDate).") {
+                           self.navigationController?.popViewController(animated: true)
                        }
                    }
-
-                   group.notify(queue: .main) { [weak self] in
-                       self?.saveButton.isEnabled = true
-                       let title   = failed ? "❌ Error" : "✅ Saved"
-                       let message = failed ? "Some records failed to save."
-                                            : "Attendance saved for \(self?.selectedDate ?? "")."
-                       self?.showAlert(title, message: message)
+               
+            
+//            guard !students.isEmpty else {
+//                       showAlert("Error", message: "No students found.")
+//                       return
+//                   }
+//
+//                   saveButton.isEnabled = false
+//                   let group = DispatchGroup()
+//                   var failed = false
+//
+//                   for student in students {
+//                       let status = attendanceMap[student.uid] ?? .absent
+//                       group.enter()
+//                       AttendanceManager.shared.markAttendance(studentUID:  student.uid,
+//                                                               studentName: student.name,
+//                                                               status:      status,
+//                                                               date:        selectedDate) { result in
+//                           if case .failure = result { failed = true }
+//                           group.leave()
+//                       }
+//                   }
+//
+//                   group.notify(queue: .main) { [weak self] in
+//                       self?.saveButton.isEnabled = true
+//                       let title   = failed ? "❌ Error" : "✅ Saved"
+//                       let message = failed ? "Some records failed to save."
+//                                            : "Attendance saved for \(self?.selectedDate ?? "")."
+//                       self?.showAlert(title, message: message)
                    }
             
 //            saveButton.isEnabled = false
@@ -135,12 +173,19 @@ class AdminAttendanceViewController: UIViewController {
 //                self?.showAlert(title, message: message)
 //            }
         }
+    private func showAlert(_ title: String, message: String, completion: (() -> Void)? = nil) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            completion?()
+        })
+        present(alert, animated: true)
+    }
 
-        private func showAlert(_ title: String, message: String) {
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
-        }
+//        private func showAlert(_ title: String, message: String) {
+//            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+//            alert.addAction(UIAlertAction(title: "OK", style: .default))
+//            present(alert, animated: true)
+//        }
     }
 
     // MARK: - TableView

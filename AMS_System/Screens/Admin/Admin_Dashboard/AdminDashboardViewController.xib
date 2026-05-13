@@ -15,7 +15,6 @@
                 <outlet property="Card2" destination="wfy-nr-vRm" id="Iyx-wu-XGC"/>
                 <outlet property="StudentTableView" destination="c0R-MT-kbY" id="7oo-E8-zFF"/>
                 <outlet property="adminName" destination="edv-TL-mGB" id="6gi-Y4-25V"/>
-                <outlet property="pieChartView" destination="5g2-bW-AV1" id="gai-Bg-pX2"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
