@@ -102,22 +102,94 @@ class LoginViewController: UIViewController {
         
     }
     private func navigate(user: FirebaseAuth.User, role: UserRole) {
-         let vc: UIViewController
+        
+////         let vc: UIViewController
+//
+//         switch role {
+//         case .admin:
+//             let adminVC = AdminDashboardViewController(nibName: "AdminDashboardViewController", bundle: nil)
+//             adminVC.user = user
+//             vc = adminVC
+//
+//         case .student:
+//             let studentVC = StudentDashboardViewController(nibName: "StudentDashboardViewController", bundle: nil)
+//             studentVC.user = user
+//             vc = studentVC
+//         }
+//
+//         navigationController?.setViewControllers([vc], animated: true)
+        let tabBarController: UITabBarController
 
-         switch role {
-         case .admin:
-             let adminVC = AdminDashboardViewController(nibName: "AdminDashboardViewController", bundle: nil)
-             adminVC.user = user
-             vc = adminVC
+           switch role {
+           case .admin:
+               tabBarController = makeAdminTabBar(user: user)
 
-         case .student:
-             let studentVC = StudentDashboardViewController(nibName: "StudentDashboardViewController", bundle: nil)
-             studentVC.user = user
-             vc = studentVC
-         }
+           case .student:
+               tabBarController = makeStudentTabBar(user: user)
+           }
 
-         navigationController?.setViewControllers([vc], animated: true)
+           navigationController?.setViewControllers([tabBarController], animated: true)
+        
      }
+    //make admin tabbar
+    private func makeAdminTabBar(user: FirebaseAuth.User) -> UITabBarController {
+        // Dashboard
+        let dashboardVC = AdminDashboardViewController(nibName: "AdminDashboardViewController", bundle: nil)
+        dashboardVC.user = user
+        dashboardVC.tabBarItem = UITabBarItem(title: "Dashboard", image: UIImage(systemName: "house.fill"), tag: 0)
+
+        // Attendance
+        let attendanceVC = AdminAttendanceViewController(nibName: "AdminAttendanceViewController", bundle: nil)
+        attendanceVC.user = user
+        attendanceVC.tabBarItem = UITabBarItem(title: "Attendance", image: UIImage(systemName: "checkmark.circle.fill"), tag: 1)
+
+        // Profile
+        let profileVC = AdminProfileViewController(nibName: "AdminProfileViewController", bundle: nil)
+        profileVC.user = user
+        profileVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 2)
+        
+        let nav1 = UINavigationController(rootViewController: dashboardVC)
+            let nav2 = UINavigationController(rootViewController: attendanceVC)
+            let nav3 = UINavigationController(rootViewController: profileVC)
+
+        let tabBar = UITabBarController()
+        tabBar.viewControllers = [nav1, nav2, nav3]
+        tabBar.tabBar.tintColor = .systemBlue
+        tabBar.tabBar.unselectedItemTintColor = .gray
+        tabBar.tabBar.backgroundColor = .white
+        return tabBar
+    }
+    
+    //make student tabbar
+    private func makeStudentTabBar(user: FirebaseAuth.User) -> UITabBarController {
+        // Dashboard
+        let dashboardVC = StudentDashboardViewController(nibName: "StudentDashboardViewController", bundle: nil)
+        dashboardVC.user = user
+        dashboardVC.tabBarItem = UITabBarItem(title: "Dashboard", image: UIImage(systemName: "house.fill"), tag: 0)
+        
+
+        // Attendance
+        let attendanceVC = StudentAttendanceViewController(nibName: "StudentAttendanceViewController", bundle: nil)
+        attendanceVC.user = user
+        attendanceVC.tabBarItem = UITabBarItem(title: "Attendance", image: UIImage(systemName: "calendar.badge.clock"), tag: 1)
+        
+
+        // Profile
+        let profileVC = StudentProfileViewController(nibName: "StudentProfileViewController", bundle: nil)
+        profileVC.user = user
+        profileVC.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.crop.circle"), tag: 2)
+        
+        let nav1 = UINavigationController(rootViewController: dashboardVC)
+            let nav2 = UINavigationController(rootViewController: attendanceVC)
+            let nav3 = UINavigationController(rootViewController: profileVC)
+        
+        let tabBar = UITabBarController()
+        tabBar.viewControllers = [nav1, nav2, nav3]
+        tabBar.tabBar.tintColor = .systemGreen
+        tabBar.tabBar.unselectedItemTintColor = .gray
+        tabBar.tabBar.backgroundColor = .white
+        return tabBar
+    }
     
     // navigate to signup
     func goToSignUp(){

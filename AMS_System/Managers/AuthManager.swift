@@ -6,6 +6,7 @@
 //
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 import FirebaseCore
 import GoogleSignIn
 
@@ -146,6 +147,29 @@ final class AuthManager {
             }
         }
     }
+    
+    // MARK: - Fetch User Profile ✅ NEW
+        func fetchUserProfile(completion: @escaping (Result<[String: Any], Error>) -> Void) {
+            guard let uid = currentUser?.uid else {
+                completion(.failure(AuthError.noFirebaseUser))
+                return
+            }
+
+            Firestore.firestore().collection("user").document(uid).getDocument { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                guard let data = snapshot?.data() else {
+                    completion(.failure(AuthError.noFirebaseUser))
+                    return
+                }
+
+                completion(.success(data))
+            }
+        }
+    
 
     // MARK: - Sign Out
     func signOut(completion: @escaping (Result<Void, Error>) -> Void) {

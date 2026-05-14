@@ -6,9 +6,11 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class StudentAttendanceViewController: UIViewController {
     
+    var user: FirebaseAuth.User?
     //MARk: IB OULTETS
     
     @IBOutlet weak var presentLabel: UILabel!

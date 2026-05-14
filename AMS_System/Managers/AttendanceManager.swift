@@ -271,40 +271,40 @@ final class AttendanceManager {
                                 markedAt:    marked.dateValue())
     }
     
-//    // MARK: - Fetch Overall Attendance Stats (Admin)
-//    func fetchOverallStats(students: [Student],
-//                           completion: @escaping (Int, Int, Int) -> Void) {
-//        let today = todayString
-//        var present   = 0
-//        var absent    = 0
-//        var notMarked = 0
-//        let group = DispatchGroup()
-//
-//        for student in students {
-//            group.enter()
-//            db.collection("attendance")
-//              .document(student.uid)
-//              .collection("records")
-//              .document(today)
-//              .getDocument { snapshot, _ in
-//                  if let data = snapshot?.data(),
-//                     let statusStr = data["status"] as? String,
-//                     let status = AttendanceStatus(rawValue: statusStr) {
-//                      switch status {
-//                      case .present: present += 1
-//                      case .absent:  absent  += 1
-//                      }
-//                  } else {
-//                      notMarked += 1
-//                  }
-//                  group.leave()
-//              }
-//        }
-//
-//        group.notify(queue: .main) {
-//            completion(present, absent, notMarked)
-//        }
-//    }
+    // MARK: - Fetch Overall Attendance Stats (Admin)
+    func fetchOverallStats(students: [Student],
+                           completion: @escaping (Int, Int, Int) -> Void) {
+        let today = todayString
+        var present   = 0
+        var absent    = 0
+        var notMarked = 0
+        let group = DispatchGroup()
+
+        for student in students {
+            group.enter()
+            db.collection("attendance")
+              .document(student.uid)
+              .collection("records")
+              .document(today)
+              .getDocument { snapshot, _ in
+                  if let data = snapshot?.data(),
+                     let statusStr = data["status"] as? String,
+                     let status = AttendanceStatus(rawValue: statusStr) {
+                      switch status {
+                      case .present: present += 1
+                      case .absent:  absent  += 1
+                      }
+                  } else {
+                      notMarked += 1
+                  }
+                  group.leave()
+              }
+        }
+
+        group.notify(queue: .main) {
+            completion(present, absent, notMarked)
+        }
+    }
 }
 
 // MARK: - Attendance Errors

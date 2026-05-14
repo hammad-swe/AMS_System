@@ -7,13 +7,13 @@
 
 import UIKit
 import FirebaseAuth
-//import FirebaseFirestore
-//import Charts
-//import DGCharts
+import FirebaseFirestore
+import Charts
+import DGCharts
 
 class AdminDashboardViewController: UIViewController {
 
- //   @IBOutlet weak var pieChartView: PieChartView!
+@IBOutlet weak var pieChartView: PieChartView!
     @IBOutlet weak var adminName: UILabel!
     @IBOutlet weak var StudentTableView: UITableView!
     @IBOutlet weak var Card1: UIStackView!
@@ -22,10 +22,10 @@ class AdminDashboardViewController: UIViewController {
     
     var user: FirebaseAuth.User?
    private var students: [Student] = []
-    private var latestAttendanceMap: [String: AttendanceStatus] = [:]
-        private var latestAttendanceDate: String = ""
-       // private var attendanceMap: [String: AttendanceStatus] = [:]
- //  private var attendanceListener: ListenerRegistration?
+  // private var latestAttendanceMap: [String: AttendanceStatus] = [:]
+  //  private var latestAttendanceDate: String = ""
+        private var attendanceMap: [String: AttendanceStatus] = [:]
+  private var attendanceListener: ListenerRegistration?
     
     
     override func viewDidLoad() {
@@ -56,25 +56,25 @@ class AdminDashboardViewController: UIViewController {
         StudentTableView.register(UINib(nibName: "StudentTableViewCell", bundle: nil),
                                            forCellReuseIdentifier: "StudentTableViewCell")
         StudentTableView.rowHeight = 70
-//        loadStudents()
+       loadStudents()
 //        setupPieChart()
-       // setupEmptyPieChart()
+        setupEmptyPieChart()
         // Do any additional setup after loading the view.
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadStudents()
-        //attendanceListener?.remove()
+        attendanceListener?.remove()
         
     }
     
-//    private func setupEmptyPieChart() {
-////            pieChartView.noDataText       = "Loading attendance..."
-////            pieChartView.noDataTextColor  = .secondaryLabel
-////            pieChartView.noDataFont       = .systemFont(ofSize: 14)
-////            pieChartView.data             = nil
-//        }
+    private func setupEmptyPieChart() {
+//            pieChartView.noDataText       = "Loading attendance..."
+//            pieChartView.noDataTextColor  = .secondaryLabel
+//            pieChartView.noDataFont       = .systemFont(ofSize: 14)
+//            pieChartView.data             = nil
+        }
     
     
     // MARK: - Load Students
@@ -84,11 +84,11 @@ class AdminDashboardViewController: UIViewController {
                     switch result {
                     case .success(let students):
                         self?.students = students  // ✅ stored here
-//                        self?.loadAttendanceMap(for: students) 
+                      self?.loadAttendanceMap(for: students)
                         self?.StudentTableView.reloadData()
                         print("✅ Students loaded: \(students.count)")
                         
-                       //self?.startAttendanceListener()
+                      self?.startAttendanceListener()
 
                     case .failure(let error):
                         print("❌ Failed to load students: \(error.localizedDescription)")
@@ -98,14 +98,14 @@ class AdminDashboardViewController: UIViewController {
             }
         }
     
-//    private func loadAttendanceMap(for students: [Student]) {
-//        let today = AttendanceManager.shared.todayString  // ✅ reuse existing helper
-//
-//        AttendanceManager.shared.fetchAttendanceForDate(today, students: students) { [weak self] recordMap in
-//            self?.attendanceMap = recordMap.mapValues { $0.status }  // ⚠️ adjust .status to your field name
-//            self?.StudentTableView.reloadData()
-//        }
-//    }
+    private func loadAttendanceMap(for students: [Student]) {
+        let today = AttendanceManager.shared.todayString  // ✅ reuse existing helper
+
+        AttendanceManager.shared.fetchAttendanceForDate(today, students: students) { [weak self] recordMap in
+            self?.attendanceMap = recordMap.mapValues { $0.status }  // ⚠️ adjust .status to your field name
+            self?.StudentTableView.reloadData()
+        }
+    }
     
     // signout tapped
     @objc private func signOutTapped() {
@@ -176,7 +176,7 @@ class AdminDashboardViewController: UIViewController {
 
            let vc = AdminAttendanceViewController(nibName: "AdminAttendanceViewController", bundle: nil)
            vc.students = students  // ✅ must be set before push
-        vc.delegate = self  // setting delegate
+       // vc.delegate = self  // setting delegate
            navigationController?.pushViewController(vc, animated: true)
 //        // Navigate to Attendance Page
 //        let vc = AdminAttendanceViewController(nibName: "AdminAttendanceViewController", bundle: nil)
@@ -197,81 +197,81 @@ class AdminDashboardViewController: UIViewController {
 //        }
     
     
-//    // MARK: - Real-Time Attendance Listener
-//        private func startAttendanceListener() {
-////            guard !students.isEmpty else { return }
-////
-////            let db    = Firestore.firestore()
-////            _ = AttendanceManager.shared.todayString
-////
-////            // Listen to first student to trigger refresh
-////            // Re-fetch all stats whenever any attendance changes
-////            attendanceListener = db.collection("attendance")
-////                .addSnapshotListener { [weak self] _, _ in
-////                    guard let self = self else { return }
-////                    self.updatePieChart()
-////                }
-//        }
+    // MARK: - Real-Time Attendance Listener
+        private func startAttendanceListener() {
+            guard !students.isEmpty else { return }
+
+            let db    = Firestore.firestore()
+            _ = AttendanceManager.shared.todayString
+
+            // Listen to first student to trigger refresh
+            // Re-fetch all stats whenever any attendance changes
+            attendanceListener = db.collection("attendance")
+                .addSnapshotListener { [weak self] _, _ in
+                    guard let self = self else { return }
+                    self.updatePieChart()
+                }
+        }
     
-   // private func updatePieChart() {
-//        guard !students.isEmpty else { return }
-//
-//        AttendanceManager.shared.fetchOverallStats(students: students) { [weak self] present, absent, notMarked in
-//            guard let self = self else { return }
-//
-//            let total = self.students.count
-//
-//            // ✅ Use existing calculatePercentage logic
-//            let presentRecords  = Array(repeating: AttendanceRecord.mock(status: .present), count: present)
-//            let absentRecords   = Array(repeating: AttendanceRecord.mock(status: .absent),  count: absent)
-//            let allRecords      = presentRecords + absentRecords
-//
-//            let presentPct  = AttendanceManager.shared.calculatePercentage(records: allRecords)
-//            let absentPct   = total > 0 ? (Double(absent)    / Double(total)) * 100.0 : 0.0
-//            let notMarkedPct = total > 0 ? (Double(notMarked) / Double(total)) * 100.0 : 0.0
-//
-//            print("📊 Present: \(present) (\(String(format: "%.1f", presentPct))%)")
-//            print("📊 Absent: \(absent) (\(String(format: "%.1f", absentPct))%)")
-//            print("📊 Not Marked: \(notMarked) (\(String(format: "%.1f", notMarkedPct))%)")
-//
-//            var entries: [PieChartDataEntry] = []
-//            if present   > 0 { entries.append(PieChartDataEntry(value: presentPct,   label: "Present")) }
-//            if absent    > 0 { entries.append(PieChartDataEntry(value: absentPct,    label: "Absent")) }
-//            if notMarked > 0 { entries.append(PieChartDataEntry(value: notMarkedPct, label: "Not Marked")) }
-//
-//            guard !entries.isEmpty else {
-//                self.pieChartView.data       = nil
-//                self.pieChartView.noDataText = "No attendance data for today."
-//                return
-//            }
-//
-//            let dataSet = PieChartDataSet(entries: entries, label: "")
-//            dataSet.colors = [
-//                UIColor.systemGreen,
-//                UIColor.systemRed,
-//                UIColor.systemGray3
-//            ]
-//            dataSet.sliceSpace     = 2
-//            dataSet.selectionShift = 8
-//
-//            // ✅ Show percentage in slices
-//            let data = PieChartData(dataSet: dataSet)
-//            data.setValueFormatter(PercentageValueFormatter())
-//            data.setValueFont(.systemFont(ofSize: 12, weight: .semibold))
-//            data.setValueTextColor(.white)
-//
-//            self.pieChartView.data                           = data
-//            self.pieChartView.holeRadiusPercent              = 0.45
-//            self.pieChartView.holeColor                      = .systemBackground
-//            self.pieChartView.transparentCircleRadiusPercent = 0.5
-//            self.pieChartView.drawEntryLabelsEnabled         = false
-//            self.pieChartView.legend.enabled                 = true
-//            self.pieChartView.legend.horizontalAlignment     = .center
-//            self.pieChartView.centerText                     = "\(total)\nStudents"
-//            self.pieChartView.animate(xAxisDuration: 0.8, easingOption: .easeInOutQuart)
-//            self.pieChartView.notifyDataSetChanged()
-//        }
-   // }
+    private func updatePieChart() {
+        guard !students.isEmpty else { return }
+
+        AttendanceManager.shared.fetchOverallStats(students: students) { [weak self] present, absent, notMarked in
+            guard let self = self else { return }
+
+            let total = self.students.count
+
+            // ✅ Use existing calculatePercentage logic
+            let presentRecords  = Array(repeating: AttendanceRecord.mock(status: .present), count: present)
+            let absentRecords   = Array(repeating: AttendanceRecord.mock(status: .absent),  count: absent)
+            let allRecords      = presentRecords + absentRecords
+
+            let presentPct  = AttendanceManager.shared.calculatePercentage(records: allRecords)
+            let absentPct   = total > 0 ? (Double(absent)    / Double(total)) * 100.0 : 0.0
+            let notMarkedPct = total > 0 ? (Double(notMarked) / Double(total)) * 100.0 : 0.0
+
+            print("📊 Present: \(present) (\(String(format: "%.1f", presentPct))%)")
+            print("📊 Absent: \(absent) (\(String(format: "%.1f", absentPct))%)")
+            print("📊 Not Marked: \(notMarked) (\(String(format: "%.1f", notMarkedPct))%)")
+
+            var entries: [PieChartDataEntry] = []
+            if present   > 0 { entries.append(PieChartDataEntry(value: presentPct,   label: "Present")) }
+            if absent    > 0 { entries.append(PieChartDataEntry(value: absentPct,    label: "Absent")) }
+            if notMarked > 0 { entries.append(PieChartDataEntry(value: notMarkedPct, label: "Not Marked")) }
+
+            guard !entries.isEmpty else {
+                self.pieChartView.data       = nil
+                self.pieChartView.noDataText = "No attendance data for today."
+                return
+            }
+
+            let dataSet = PieChartDataSet(entries: entries, label: "")
+            dataSet.colors = [
+                UIColor.systemGreen,
+                UIColor.systemRed,
+                UIColor.systemGray3
+            ]
+            dataSet.sliceSpace     = 2
+            dataSet.selectionShift = 8
+
+            // ✅ Show percentage in slices
+            let data = PieChartData(dataSet: dataSet)
+            data.setValueFormatter(PercentageValueFormatter())
+            data.setValueFont(.systemFont(ofSize: 12, weight: .semibold))
+            data.setValueTextColor(.white)
+
+            self.pieChartView.data                           = data
+            self.pieChartView.holeRadiusPercent              = 0.45
+            self.pieChartView.holeColor                      = .systemBackground
+            self.pieChartView.transparentCircleRadiusPercent = 0.5
+            self.pieChartView.drawEntryLabelsEnabled         = false
+            self.pieChartView.legend.enabled                 = true
+            self.pieChartView.legend.horizontalAlignment     = .center
+            self.pieChartView.centerText                     = "\(total)\nStudents"
+            self.pieChartView.animate(xAxisDuration: 0.8, easingOption: .easeInOutQuart)
+            self.pieChartView.notifyDataSetChanged()
+        }
+    }
     
     private func showAlert(_ title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -282,15 +282,15 @@ class AdminDashboardViewController: UIViewController {
 }
 
 // MARK: - AttendanceDelegate
-extension AdminDashboardViewController: AttendanceDelegate {
-
-    func didSaveAttendance(_ attendanceMap: [String: AttendanceStatus], date: String) {
-        print("📥 Attendance received for date: \(date)")
-        latestAttendanceMap  = attendanceMap
-        latestAttendanceDate = date
-        StudentTableView.reloadData()  // ✅ refresh table to show updated status
-    }
-}
+//extension AdminDashboardViewController: AttendanceDelegate {
+//
+//    func didSaveAttendance(_ attendanceMap: [String: AttendanceStatus], date: String) {
+//        print("📥 Attendance received for date: \(date)")
+//        latestAttendanceMap  = attendanceMap
+//        latestAttendanceDate = date
+//        StudentTableView.reloadData()  // ✅ refresh table to show updated status
+//    }
+//}
 
   
 extension AdminDashboardViewController: UITableViewDataSource, UITableViewDelegate {
@@ -303,13 +303,13 @@ extension AdminDashboardViewController: UITableViewDataSource, UITableViewDelega
         let cell    = tableView.dequeueReusableCell(withIdentifier: "StudentTableViewCell",
                                                     for: indexPath) as! StudentTableViewCell
         let student = students[indexPath.row]
-       // let status  = attendanceMap[student.uid] ?? .absent  // ✅ actual value
-        let status  = latestAttendanceMap[student.uid] ?? .absent
+       let status  = attendanceMap[student.uid] ?? .absent  // ✅ actual value
+        //let status  = latestAttendanceMap[student.uid] ?? .absent
 
         cell.configure(student: student, status: status)
-//        cell.onToggle = { [weak self] newStatus in
-//            self?.attendanceMap[student.uid] = newStatus
-//        }
+        cell.onToggle = { [weak self] newStatus in
+            self?.attendanceMap[student.uid] = newStatus
+        }
         return cell
     }
 
